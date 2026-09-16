@@ -49,7 +49,10 @@ export function AppTopbar({ user }: AppTopbarProps) {
       <div className="flex items-center gap-3">
         <ModeToggle />
         <DropdownMenu>
-          <DropdownMenuTrigger className="rounded-full outline-none">
+          <DropdownMenuTrigger
+            className="rounded-full outline-none"
+            aria-label="Account menu"
+          >
             <Avatar>
               <AvatarFallback className="bg-primary text-primary-foreground">
                 {initials(user)}
