@@ -588,7 +588,7 @@ export class RegistrationsService {
     });
   }
   async adviserQueue(adviserId: string): Promise<Registration[]> {
-    return this.registrations
+    const rows = await this.registrations
       .createQueryBuilder('r')
       .innerJoin(Approval, 'a', 'a.registration_id = r.id')
       .leftJoinAndSelect('r.courses', 'courses')
@@ -599,13 +599,14 @@ export class RegistrationsService {
       .andWhere('a.adviser_id = :adviserId', { adviserId })
       .orderBy('r.submitted_at', 'ASC')
       .getMany();
+    return rows.map((r) => this.sanitizeRegistration(r));
   }
   async hodQueue(hodId: string): Promise<Registration[]> {
     const department = await this.departments.findOne({
       where: { hodId },
     });
     if (!department) return [];
-    return this.registrations
+    const rows = await this.registrations
       .createQueryBuilder('r')
       .innerJoin(StudentProfile, 'sp', 'sp.user_id = r.student_id')
       .leftJoinAndSelect('r.courses', 'courses')
@@ -618,6 +619,7 @@ export class RegistrationsService {
       })
       .orderBy('r.submitted_at', 'ASC')
       .getMany();
+    return rows.map((r) => this.sanitizeRegistration(r));
   }
   async getOwn(
     studentId: string,
@@ -631,10 +633,19 @@ export class RegistrationsService {
       if (!current) return null;
       resolvedSemesterId = current.id;
     }
-    return this.registrations.findOne({
+    const registration = await this.registrations.findOne({
       where: { studentId, semesterId: resolvedSemesterId },
-      relations: ['courses', 'courses.course', 'approval', 'semester'],
+      relations: [
+        'courses',
+        'courses.course',
+        'approval',
+        'approval.adviser',
+        'approval.hod',
+        'semester',
+        'semester.session',
+      ],
     });
+    return registration ? this.sanitizeRegistration(registration) : null;
   }
   private async findByIdOrThrow(
     id: string,
@@ -642,9 +653,16 @@ export class RegistrationsService {
   ): Promise<Registration> {
     const registration = await manager.getRepository(Registration).findOne({
       where: { id },
-      relations: ['courses', 'courses.course', 'approval'],
+      relations: [
+        'courses',
+        'courses.course',
+        'approval',
+        'approval.adviser',
+        'approval.hod',
+        'student',
+      ],
     });
     if (!registration) throw new NotFoundException('Registration not found');
-    return registration;
+    return this.sanitizeRegistration(registration);
   }
 }
