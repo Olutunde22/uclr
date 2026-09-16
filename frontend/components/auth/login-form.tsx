@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,10 @@ export function LoginForm() {
       // returns.
       await loginAction(values.identifier, values.password);
     } catch (error) {
+      // A successful login throws Next's internal NEXT_REDIRECT signal to
+      // drive the post-login navigation — let it propagate instead of
+      // surfacing it as a form error.
+      if (isRedirectError(error)) throw error;
       setFormError(
         error instanceof Error
           ? error.message
