@@ -15,5 +15,16 @@ export default defineConfig({
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000',
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // `channel: 'chrome'` runs against the machine's real installed Google
+  // Chrome instead of Playwright's own bundled Chromium build. This sandbox
+  // can't reach playwright.dev's CDN to download that build (every
+  // `playwright install chromium` attempt times out, confirmed not
+  // transient), and `channel: 'chrome'` needs no download at all — it's also
+  // Playwright's own documented fallback for exactly this situation. Revert
+  // to the plain `devices['Desktop Chrome']` project if a future environment
+  // can reach the CDN and dedicated Chromium coverage matters more than
+  // matching the user's actual browser.
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], channel: 'chrome' } },
+  ],
 });
