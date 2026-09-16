@@ -63,7 +63,32 @@ bun dev
 | Lecturer | `lecturer@ulcrs.edu.ng` |
 | Student | any seeded matric no., e.g. `CSC/24/003` (login accepts email, matric no. or staff ID) |
 
-> Work in progress. See [PROGRESS.md](./PROGRESS.md) for what currently runs.
+Every department has its own HOD (e.g. `hod.mth@ulcrs.edu.ng` for Mathematics) sharing the
+same `Seed@12345!` password — `hod@ulcrs.edu.ng` above is specifically the Computer Science
+one.
+
+## Testing
+
+```bash
+# Backend: rule unit tests + full e2e suite (needs compose Postgres running)
+cd backend
+bun run test        # RegistrationRulesService, 17 cases
+bun run test:e2e     # supertest against a real Postgres: happy path, rule violations,
+                     # capacity (incl. a concurrent race for the last seat), scoping
+
+# Frontend: component/lib unit tests + browser e2e (needs the backend, seeded, and this
+# app both running — see "Getting started" above)
+cd frontend
+bun run test         # vitest
+bun run test:e2e     # playwright: login per role, the full registration→approval walk
+```
+
+Playwright's own bundled Chromium build can't be downloaded in every environment (its CDN
+may be unreachable from a sandboxed network). `playwright.config.ts` runs against the
+machine's real installed Google Chrome instead (`channel: 'chrome'`) precisely so
+`bun run test:e2e` doesn't need that download at all — install
+[Google Chrome](https://www.google.com/chrome/) if you don't already have it, no
+`playwright install` step required.
 
 ## Docs
 
