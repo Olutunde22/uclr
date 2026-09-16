@@ -30,15 +30,20 @@ export async function getMe(): Promise<ApiResponse<AuthenticatedUser | null>> {
   }
 }
 
-// Deliberate exception to "services never throw" (auth.md: "Login and
-// OAuth-callback handlers may throw rather than returning the result
-// envelope, because their callers drive error UI from a caught error").
-// Converting this to the envelope means a failed login would fall through to
-// the success redirect instead of showing the form's error state.
+// Returns the failure as a value instead of throwing. A previous version of
+// this threw an Error for the form's catch block to read — that broke in any
+// production build: Next.js redacts every error thrown across a Server
+// Action boundary into a generic "error occurred in the Server Components
+// render..." message plus a digest, regardless of what the Error's own
+// message said (confirmed live: dev mode happened to pass the real message
+// through, production does not). Returning the failure sidesteps Next's
+// redaction entirely, which is Next's own documented fix for this. `redirect()`
+// still throws internally on success — that's Next's own control-flow signal,
+// not user data, and Next does not redact it.
 export async function loginAction(
   identifier: string,
   password: string,
-): Promise<void> {
+): Promise<{ ok: false; message: string } | undefined> {
   let response;
   try {
     // The backend's LoginDto field is literally named `email`, even though it
@@ -53,15 +58,16 @@ export async function loginAction(
     );
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    throw new Error(
-      handleAPIErrors(error, 'Unable to log in. Please try again.'),
-    );
+    return {
+      ok: false,
+      message: handleAPIErrors(error, 'Unable to log in. Please try again.'),
+    };
   }
 
   if (!response.data.success) {
     const raw = response.data.message;
     const message = Array.isArray(raw) ? raw[0] : raw;
-    throw new Error(message || 'Invalid identifier or password.');
+    return { ok: false, message: message || 'Invalid identifier or password.' };
   }
 
   // The backend's Set-Cookie headers were already persisted onto this

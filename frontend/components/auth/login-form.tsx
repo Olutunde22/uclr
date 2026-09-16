@@ -1,7 +1,6 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -27,22 +26,15 @@ export function LoginForm() {
 
   const onSubmit = async (values: LoginFormData) => {
     setFormError(null);
-    try {
-      // loginAction throws rather than resolving with the envelope — a
-      // deliberate exception (auth.md), so the catch here drives the error
-      // state directly. A successful call redirects server-side and never
-      // returns.
-      await loginAction(values.identifier, values.password);
-    } catch (error) {
-      // A successful login throws Next's internal NEXT_REDIRECT signal to
-      // drive the post-login navigation — let it propagate instead of
-      // surfacing it as a form error.
-      if (isRedirectError(error)) throw error;
-      setFormError(
-        error instanceof Error
-          ? error.message
-          : 'Unable to log in. Please try again.',
-      );
+    // A successful login calls redirect() inside the action, which throws
+    // Next's internal NEXT_REDIRECT signal and never returns here — this
+    // component unmounts before the line below would run. A failed login
+    // resolves with the failure instead of throwing (see services/auth.ts's
+    // comment on loginAction for why: Next.js redacts anything thrown across
+    // a Server Action boundary in production builds).
+    const result = await loginAction(values.identifier, values.password);
+    if (result && !result.ok) {
+      setFormError(result.message);
     }
   };
 
