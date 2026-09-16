@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ulcrs
+      POSTGRES_PASSWORD: ulcrs
+      POSTGRES_DB: ulcrs
+    ports:
+      - "5432:5432"
+    volumes:
+      - ulcrs_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  ulcrs_postgres_data:
