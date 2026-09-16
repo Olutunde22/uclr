@@ -1398,20 +1398,17 @@ async function seedFeeData(
       }),
     );
   };
-  // Spread students across four fee scenarios (index % 4) so /fees/students and
-  // the student's own /fees page both have a realistic, varied dataset to page
-  // through: some students never touched fees at all, some paid but were denied
-  // clearance, some are fully cleared off one payment, and some have a real
-  // multi-session payment history (prior + current session) and are cleared for
-  // both. See PROGRESS.md Decisions for the reasoning.
+  // Spread students across three fee scenarios (index % 3) so /fees/students
+  // and the student's own /fees page both have a realistic, varied dataset to
+  // page through, while every seeded student has at least one real payment
+  // (no student's history is empty): some paid but were denied clearance
+  // (e.g. underpaid), some are fully cleared off one payment, and some have a
+  // real multi-session payment history (prior + current session) and are
+  // cleared for both. See PROGRESS.md Decisions for the reasoning.
   for (const [index, student] of students.entries()) {
-    const bucket = index % 4;
+    const bucket = index % 3;
     const matricSlug = student.profile.matricNo.replace(/\//g, '-');
     if (bucket === 0) {
-      // Zero payments, no clearance record at all.
-      continue;
-    }
-    if (bucket === 1) {
       // One payment, explicitly not cleared (e.g. underpaid).
       await upsertPayment(
         student.user.id,
@@ -1423,7 +1420,7 @@ async function seedFeeData(
       await upsertClearance(student.user.id, currentSession.id, false);
       continue;
     }
-    if (bucket === 2) {
+    if (bucket === 1) {
       // One payment, fully cleared, single session.
       await upsertPayment(
         student.user.id,
@@ -1435,7 +1432,7 @@ async function seedFeeData(
       await upsertClearance(student.user.id, currentSession.id, true);
       continue;
     }
-    // bucket === 3: multiple payments across two sessions, cleared for both.
+    // bucket === 2: multiple payments across two sessions, cleared for both.
     // Receipt numbers are unique across the whole table (not just per
     // session), so the prior- and current-session receipts must not share a
     // suffix or the second insert silently no-ops as "already exists".
