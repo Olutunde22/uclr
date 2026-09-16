@@ -22,7 +22,14 @@ import {
 } from '../../modules/courses/entities/timetable-slot.entity';
 import { CourseResult } from '../../modules/courses/entities/course-result.entity';
 import { FeeClearance } from '../../modules/fees/entities/fee-clearance.entity';
+import { FeePayment } from '../../modules/fees/entities/fee-payment.entity';
 import { SystemSetting } from '../../modules/settings/entities/system-setting.entity';
+import { Registration } from '../../modules/registrations/entities/registration.entity';
+import type { RegistrationStatus } from '../../modules/registrations/entities/registration.entity';
+import { RegistrationCourse } from '../../modules/registrations/entities/registration-course.entity';
+import { Approval } from '../../modules/registrations/entities/approval.entity';
+import type { ApprovalDecisionStatus } from '../../modules/registrations/entities/approval.entity';
+import { RegistryRecord } from '../../modules/records/entities/registry-record.entity';
 import {
   ALL_PERMISSIONS,
   SEEDED_ROLE_PERMISSIONS,
@@ -55,6 +62,62 @@ const DEPARTMENTS: DepartmentSeed[] = [
   { code: 'CVE', name: 'Civil Engineering', facultyCode: 'ENG' },
   { code: 'CHE', name: 'Chemical Engineering', facultyCode: 'ENG' },
 ];
+interface HodSeed {
+  firstName: string;
+  lastName: string;
+  email: string;
+  staffId: string;
+}
+const HOD_SEEDS: Record<string, HodSeed> = {
+  CSC: {
+    firstName: 'Chukwuemeka',
+    lastName: 'Obi',
+    email: 'hod@ulcrs.edu.ng',
+    staffId: 'HOD-0001',
+  },
+  MTH: {
+    firstName: 'Adaobi',
+    lastName: 'Nwachukwu',
+    email: 'hod.mth@ulcrs.edu.ng',
+    staffId: 'HOD-0002',
+  },
+  PHY: {
+    firstName: 'Olumide',
+    lastName: 'Fashina',
+    email: 'hod.phy@ulcrs.edu.ng',
+    staffId: 'HOD-0003',
+  },
+  CHM: {
+    firstName: 'Ngozi',
+    lastName: 'Okonjo',
+    email: 'hod.chm@ulcrs.edu.ng',
+    staffId: 'HOD-0004',
+  },
+  EEE: {
+    firstName: 'Babatunde',
+    lastName: 'Alabi',
+    email: 'hod.eee@ulcrs.edu.ng',
+    staffId: 'HOD-0005',
+  },
+  MEE: {
+    firstName: 'Fatima',
+    lastName: 'Sani',
+    email: 'hod.mee@ulcrs.edu.ng',
+    staffId: 'HOD-0006',
+  },
+  CVE: {
+    firstName: 'Emeka',
+    lastName: 'Nnadi',
+    email: 'hod.cve@ulcrs.edu.ng',
+    staffId: 'HOD-0007',
+  },
+  CHE: {
+    firstName: 'Grace',
+    lastName: 'Udoh',
+    email: 'hod.che@ulcrs.edu.ng',
+    staffId: 'HOD-0008',
+  },
+};
 const PROGRAMME_BY_DEPT: Record<string, string> = {
   CSC: 'B.Sc. Computer Science',
   MTH: 'B.Sc. Mathematics',
@@ -870,6 +933,7 @@ async function seedCalendar(ds: DataSource): Promise<{
   currentSession: AcademicSession;
   currentSemester: Semester;
   priorSession: AcademicSession;
+  priorSemesterLocked: Semester;
 }> {
   const sessionRepo = ds.getRepository(AcademicSession);
   const semesterRepo = ds.getRepository(Semester);
@@ -940,6 +1004,7 @@ async function seedCalendar(ds: DataSource): Promise<{
     now.getTime() + 160 * 24 * 60 * 60 * 1000,
   );
   await semesterRepo.save(secondSemester);
+  let priorFirstSemester: Semester | undefined;
   for (const name of ['first', 'second'] as const) {
     let semester = await semesterRepo.findOne({
       where: { sessionId: priorSession.id, name },
@@ -954,10 +1019,16 @@ async function seedCalendar(ds: DataSource): Promise<{
         addDropClosesAt: new Date('2024-09-15'),
         lockedAt: new Date('2025-02-01'),
       });
-      await semesterRepo.save(semester);
+      semester = await semesterRepo.save(semester);
     }
+    if (name === 'first') priorFirstSemester = semester;
   }
-  return { currentSession, currentSemester: firstSemester, priorSession };
+  return {
+    currentSession,
+    currentSemester: firstSemester,
+    priorSession,
+    priorSemesterLocked: priorFirstSemester!,
+  };
 }
 async function seedSettings(ds: DataSource): Promise<void> {
   const settingsRepo = ds.getRepository(SystemSetting);
@@ -973,6 +1044,7 @@ async function seedSettings(ds: DataSource): Promise<void> {
 interface SeededStaff {
   adviser: User;
   hod: User;
+  hodByDept: Map<string, User>;
   registry: User;
   bursary: User;
   lecturer: User;
@@ -1040,17 +1112,33 @@ async function seedStaff(
     csc.id,
     'Senior Lecturer',
   );
-  const hod = await findOrCreateUser(
-    ds,
-    'hod@ulcrs.edu.ng',
-    'Chukwuemeka',
-    'Obi',
-    rolesByName.get('hod')!,
-    passwordHash,
-  );
-  await upsertStaffProfile(ds, hod.id, 'HOD-0001', csc.id, 'Professor');
-  csc.hodId = hod.id;
-  await departmentRepo.save(csc);
+  const hodRole = rolesByName.get('hod')!;
+  const hodByDept = new Map<string, User>();
+  let cscHod: User | undefined;
+  for (const dept of DEPARTMENTS) {
+    const seed = HOD_SEEDS[dept.code];
+    const department = deptByCode.get(dept.code)!;
+    const hodUser = await findOrCreateUser(
+      ds,
+      seed.email,
+      seed.firstName,
+      seed.lastName,
+      hodRole,
+      passwordHash,
+    );
+    await upsertStaffProfile(
+      ds,
+      hodUser.id,
+      seed.staffId,
+      department.id,
+      'Professor',
+    );
+    department.hodId = hodUser.id;
+    await departmentRepo.save(department);
+    hodByDept.set(dept.code, hodUser);
+    if (dept.code === 'CSC') cscHod = hodUser;
+  }
+  const hod = cscHod!;
   const registry = await findOrCreateUser(
     ds,
     'registry@ulcrs.edu.ng',
@@ -1084,7 +1172,7 @@ async function seedStaff(
     passwordHash,
   );
   await upsertStaffProfile(ds, lecturer.id, 'LEC-0001', csc.id, 'Lecturer I');
-  return { adviser, hod, registry, bursary, lecturer };
+  return { adviser, hod, hodByDept, registry, bursary, lecturer };
 }
 async function seedCourses(
   ds: DataSource,
@@ -1265,35 +1353,301 @@ async function seedCourseResults(
     }
   }
 }
-async function seedFeeClearances(
+async function seedFeeData(
   ds: DataSource,
   students: SeededStudent[],
   currentSession: AcademicSession,
-  clearedBy: User,
+  priorSession: AcademicSession,
+  bursary: User,
 ): Promise<void> {
   const clearanceRepo = ds.getRepository(FeeClearance);
-  for (const [index, student] of students.entries()) {
-    const bucket = index % 3;
-    if (bucket === 0) continue;
+  const paymentRepo = ds.getRepository(FeePayment);
+  const upsertClearance = async (
+    studentId: string,
+    sessionId: string,
+    cleared: boolean,
+  ): Promise<void> => {
     let clearance = await clearanceRepo.findOne({
-      where: { studentId: student.user.id, sessionId: currentSession.id },
+      where: { studentId, sessionId },
     });
     if (!clearance) {
-      clearance = clearanceRepo.create({
-        studentId: student.user.id,
-        sessionId: currentSession.id,
-      });
+      clearance = clearanceRepo.create({ studentId, sessionId });
+    }
+    clearance.cleared = cleared;
+    clearance.clearedBy = cleared ? bursary.id : null;
+    clearance.clearedAt = cleared ? new Date() : null;
+    await clearanceRepo.save(clearance);
+  };
+  const upsertPayment = async (
+    studentId: string,
+    sessionId: string,
+    receiptNo: string,
+    amount: string,
+    paymentDate: string,
+  ): Promise<void> => {
+    const existing = await paymentRepo.findOne({ where: { receiptNo } });
+    if (existing) return;
+    await paymentRepo.save(
+      paymentRepo.create({
+        studentId,
+        sessionId,
+        receiptNo,
+        amount,
+        paymentDate,
+        recordedBy: bursary.id,
+      }),
+    );
+  };
+  // Spread students across four fee scenarios (index % 4) so /fees/students and
+  // the student's own /fees page both have a realistic, varied dataset to page
+  // through: some students never touched fees at all, some paid but were denied
+  // clearance, some are fully cleared off one payment, and some have a real
+  // multi-session payment history (prior + current session) and are cleared for
+  // both. See PROGRESS.md Decisions for the reasoning.
+  for (const [index, student] of students.entries()) {
+    const bucket = index % 4;
+    const matricSlug = student.profile.matricNo.replace(/\//g, '-');
+    if (bucket === 0) {
+      // Zero payments, no clearance record at all.
+      continue;
     }
     if (bucket === 1) {
-      clearance.cleared = false;
-      clearance.clearedBy = null;
-      clearance.clearedAt = null;
-    } else {
-      clearance.cleared = true;
-      clearance.clearedBy = clearedBy.id;
-      clearance.clearedAt = new Date();
+      // One payment, explicitly not cleared (e.g. underpaid).
+      await upsertPayment(
+        student.user.id,
+        currentSession.id,
+        `RCPT-SEED-${matricSlug}-1`,
+        '30000.00',
+        '2025-09-05',
+      );
+      await upsertClearance(student.user.id, currentSession.id, false);
+      continue;
     }
-    await clearanceRepo.save(clearance);
+    if (bucket === 2) {
+      // One payment, fully cleared, single session.
+      await upsertPayment(
+        student.user.id,
+        currentSession.id,
+        `RCPT-SEED-${matricSlug}-1`,
+        '75000.00',
+        '2025-09-10',
+      );
+      await upsertClearance(student.user.id, currentSession.id, true);
+      continue;
+    }
+    // bucket === 3: multiple payments across two sessions, cleared for both.
+    // Receipt numbers are unique across the whole table (not just per
+    // session), so the prior- and current-session receipts must not share a
+    // suffix or the second insert silently no-ops as "already exists".
+    await upsertPayment(
+      student.user.id,
+      priorSession.id,
+      `RCPT-SEED-${matricSlug}-P1`,
+      '40000.00',
+      '2024-09-12',
+    );
+    await upsertPayment(
+      student.user.id,
+      priorSession.id,
+      `RCPT-SEED-${matricSlug}-P2`,
+      '35000.00',
+      '2024-11-20',
+    );
+    await upsertClearance(student.user.id, priorSession.id, true);
+    await upsertPayment(
+      student.user.id,
+      currentSession.id,
+      `RCPT-SEED-${matricSlug}-C1`,
+      '75000.00',
+      '2025-09-08',
+    );
+    await upsertClearance(student.user.id, currentSession.id, true);
+  }
+}
+function pickStudent(
+  students: SeededStudent[],
+  deptCode: string,
+  level: number,
+  index = 0,
+): SeededStudent {
+  const matches = students.filter(
+    (s) => s.deptCode === deptCode && s.level === level,
+  );
+  const student = matches[index];
+  if (!student) {
+    throw new Error(
+      `Seed data error: no seeded student found for ${deptCode} level ${level} (index ${index})`,
+    );
+  }
+  return student;
+}
+interface RegistrationScenario {
+  student: SeededStudent;
+  semester: Semester;
+  courses: Course[];
+  status: RegistrationStatus;
+  submittedAt?: Date | null;
+  adviserId: string;
+  adviserStatus: ApprovalDecisionStatus;
+  adviserComment?: string | null;
+  adviserDecidedAt?: Date | null;
+  hodId?: string | null;
+  hodStatus?: ApprovalDecisionStatus;
+  hodComment?: string | null;
+  hodDecidedAt?: Date | null;
+}
+async function seedRegistrationScenario(
+  ds: DataSource,
+  opts: RegistrationScenario,
+): Promise<Registration> {
+  const registrationRepo = ds.getRepository(Registration);
+  const approvalRepo = ds.getRepository(Approval);
+  const registrationCourseRepo = ds.getRepository(RegistrationCourse);
+  let registration = await registrationRepo.findOne({
+    where: { studentId: opts.student.user.id, semesterId: opts.semester.id },
+  });
+  const totalUnits = opts.courses.reduce((sum, c) => sum + c.creditUnits, 0);
+  if (!registration) {
+    registration = registrationRepo.create({
+      studentId: opts.student.user.id,
+      semesterId: opts.semester.id,
+    });
+  }
+  registration.status = opts.status;
+  registration.totalUnits = totalUnits;
+  registration.submittedAt = opts.submittedAt ?? null;
+  registration = await registrationRepo.save(registration);
+  const existingCourseCount = await registrationCourseRepo.count({
+    where: { registrationId: registration.id },
+  });
+  if (existingCourseCount === 0 && opts.courses.length) {
+    await registrationCourseRepo.save(
+      opts.courses.map((course) =>
+        registrationCourseRepo.create({
+          registrationId: registration!.id,
+          courseId: course.id,
+        }),
+      ),
+    );
+  }
+  // A draft never has an approval row in the real state machine (it's only
+  // created on submit) — matched here so seeded drafts look exactly like a
+  // real, never-submitted draft.
+  if (opts.status !== 'draft') {
+    let approval = await approvalRepo.findOne({
+      where: { registrationId: registration.id },
+    });
+    if (!approval) {
+      approval = approvalRepo.create({ registrationId: registration.id });
+    }
+    approval.adviserId = opts.adviserId;
+    approval.adviserStatus = opts.adviserStatus;
+    approval.adviserComment = opts.adviserComment ?? null;
+    approval.adviserDecidedAt = opts.adviserDecidedAt ?? null;
+    approval.hodId = opts.hodId ?? null;
+    approval.hodStatus = opts.hodStatus ?? 'pending';
+    approval.hodComment = opts.hodComment ?? null;
+    approval.hodDecidedAt = opts.hodDecidedAt ?? null;
+    await approvalRepo.save(approval);
+  }
+  return registration;
+}
+async function seedRegistrationsDemo(
+  ds: DataSource,
+  students: SeededStudent[],
+  coursesByCode: Map<string, Course>,
+  currentSemester: Semester,
+  priorSemesterLocked: Semester,
+  staff: SeededStaff,
+): Promise<void> {
+  const coursesFor = (codes: string[]): Course[] =>
+    codes.map((code) => {
+      const course = coursesByCode.get(code);
+      if (!course) throw new Error(`Seed data error: unknown course ${code}`);
+      return course;
+    });
+  // Spread across three departments (CSC, MEE, EEE) so HOD-scoped views
+  // (approvals queue, department report) have real cross-department data,
+  // per PROGRESS.md Decisions.
+  await seedRegistrationScenario(ds, {
+    student: pickStudent(students, 'CSC', 100),
+    semester: currentSemester,
+    courses: coursesFor(['CSC101', 'CSC102']),
+    status: 'draft',
+    adviserId: staff.adviser.id,
+    adviserStatus: 'pending',
+  });
+  await seedRegistrationScenario(ds, {
+    student: pickStudent(students, 'MEE', 100),
+    semester: currentSemester,
+    courses: coursesFor(['MEE101']),
+    status: 'pending_adviser',
+    submittedAt: new Date(),
+    adviserId: staff.adviser.id,
+    adviserStatus: 'pending',
+  });
+  await seedRegistrationScenario(ds, {
+    student: pickStudent(students, 'CSC', 300),
+    semester: currentSemester,
+    courses: coursesFor(['CSC301', 'CSC302']),
+    status: 'pending_hod',
+    submittedAt: new Date(),
+    adviserId: staff.adviser.id,
+    adviserStatus: 'approved',
+    adviserDecidedAt: new Date(),
+  });
+  const eeeHod = staff.hodByDept.get('EEE')!;
+  await seedRegistrationScenario(ds, {
+    student: pickStudent(students, 'EEE', 200),
+    semester: currentSemester,
+    courses: coursesFor(['EEE201', 'EEE202']),
+    status: 'approved',
+    submittedAt: new Date(),
+    adviserId: staff.adviser.id,
+    adviserStatus: 'approved',
+    adviserDecidedAt: new Date(),
+    hodId: eeeHod.id,
+    hodStatus: 'approved',
+    hodDecidedAt: new Date(),
+  });
+  await seedRegistrationScenario(ds, {
+    student: pickStudent(students, 'CSC', 400),
+    semester: currentSemester,
+    courses: coursesFor(['CSC401', 'CSC402']),
+    status: 'rejected',
+    submittedAt: new Date(),
+    adviserId: staff.adviser.id,
+    adviserStatus: 'rejected',
+    adviserComment:
+      'Missing evidence of prerequisite completion. Please resubmit with a corrected course list.',
+    adviserDecidedAt: new Date(),
+  });
+  const meeHod = staff.hodByDept.get('MEE')!;
+  const finalised = await seedRegistrationScenario(ds, {
+    student: pickStudent(students, 'MEE', 200),
+    semester: priorSemesterLocked,
+    courses: coursesFor(['MEE201']),
+    status: 'finalised',
+    submittedAt: new Date('2025-01-10'),
+    adviserId: staff.adviser.id,
+    adviserStatus: 'approved',
+    adviserDecidedAt: new Date('2025-01-15'),
+    hodId: meeHod.id,
+    hodStatus: 'approved',
+    hodDecidedAt: new Date('2025-01-20'),
+  });
+  const registryRecordRepo = ds.getRepository(RegistryRecord);
+  const existingRecord = await registryRecordRepo.findOne({
+    where: { registrationId: finalised.id },
+  });
+  if (!existingRecord) {
+    await registryRecordRepo.save(
+      registryRecordRepo.create({
+        registrationId: finalised.id,
+        recordedBy: staff.registry.id,
+        recordedAt: new Date('2025-02-01'),
+      }),
+    );
   }
 }
 async function run(): Promise<void> {
@@ -1301,7 +1655,8 @@ async function run(): Promise<void> {
   const rolesByName = await seedPermissionsRolesAndAdmin(ds);
   await seedSettings(ds);
   const deptByCode = await seedAcademics(ds);
-  const { currentSession, priorSession } = await seedCalendar(ds);
+  const { currentSession, currentSemester, priorSession, priorSemesterLocked } =
+    await seedCalendar(ds);
   const passwordHash = await hashPassword(SEED_PASSWORD);
   const staff = await seedStaff(ds, rolesByName, deptByCode, passwordHash);
   const coursesByCode = await seedCourses(ds, deptByCode, staff.lecturer);
@@ -1313,9 +1668,17 @@ async function run(): Promise<void> {
     passwordHash,
   );
   await seedCourseResults(ds, students, coursesByCode, priorSession);
-  await seedFeeClearances(ds, students, currentSession, staff.bursary);
+  await seedFeeData(ds, students, currentSession, priorSession, staff.bursary);
+  await seedRegistrationsDemo(
+    ds,
+    students,
+    coursesByCode,
+    currentSemester,
+    priorSemesterLocked,
+    staff,
+  );
   console.log(
-    `Seed complete: ${deptByCode.size} departments, ${coursesByCode.size} courses, ${students.length} students. Shared demo password: "${SEED_PASSWORD}".`,
+    `Seed complete: ${deptByCode.size} departments (each with an HOD), ${coursesByCode.size} courses, ${students.length} students. Shared demo password: "${SEED_PASSWORD}".`,
   );
   await ds.destroy();
 }
