@@ -19,5 +19,11 @@ export default async function AdminIndexPage() {
   if (await canAccess(PERMISSIONS.ACADEMICS_MANAGE)) redirect('/admin/academics');
   if (await canAccess(PERMISSIONS.SETTINGS_MANAGE)) redirect('/admin/settings');
   if (await canAccess(PERMISSIONS.AUDIT_READ)) redirect('/admin/audit');
+  // Milestone 13: system_admin always matches one of the four checks above
+  // first (it holds every permission), so this is only ever reached by a
+  // caller who somehow holds reports:read without any other admin key - not
+  // possible with the current SEEDED_ROLE_PERMISSIONS, but kept for
+  // completeness/symmetry with lib/nav.ts's "System reports" item.
+  if (await canAccess(PERMISSIONS.REPORTS_READ)) redirect('/admin/reports');
   return <NoAccess />;
 }

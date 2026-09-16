@@ -49,7 +49,6 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Records',
     href: '/records',
     permissions: [PERMISSIONS.RECORDS_READ, PERMISSIONS.RECORDS_FINALISE],
-    disabled: true,
   },
   {
     label: 'Fees',
@@ -61,14 +60,29 @@ export const NAV_ITEMS: NavItem[] = [
     permissions: [PERMISSIONS.FEES_MANAGE],
   },
   {
-    label: 'Reports',
-    href: '/reports',
+    label: 'Department report',
+    href: '/department/report',
     permissions: [PERMISSIONS.REPORTS_READ],
-    disabled: true,
   },
   {
     label: 'Admin',
     href: '/admin',
+    permissions: [
+      PERMISSIONS.USERS_MANAGE,
+      PERMISSIONS.ACADEMICS_MANAGE,
+      PERMISSIONS.SETTINGS_MANAGE,
+      PERMISSIONS.AUDIT_READ,
+    ],
+  },
+  {
+    // Same permission set as "Admin" above (not REPORTS_READ, which `hod`
+    // also holds) - only system_admin holds any of these four keys, and
+    // ReportsService.systemReport is system_admin-only regardless (backend/
+    // CLAUDE.md), so this correctly hides from a pure HOD. The sidebar has
+    // no sub-item support (milestone 9), so this is its own top-level entry
+    // rather than nested under "Admin", matching "Student fees"'s precedent.
+    label: 'System reports',
+    href: '/admin/reports',
     permissions: [
       PERMISSIONS.USERS_MANAGE,
       PERMISSIONS.ACADEMICS_MANAGE,

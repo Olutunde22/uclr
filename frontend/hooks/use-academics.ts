@@ -12,6 +12,7 @@ import {
   deleteFaculty,
   getDepartments,
   getFaculties,
+  getOwnDepartment,
   updateDepartment,
   updateFaculty,
 } from '@/services/academics';
@@ -33,6 +34,16 @@ export function useDepartments(facultyId?: string) {
   return useQuery({
     queryKey: departmentsKeys.list(facultyId),
     queryFn: () => getDepartments(facultyId),
+  });
+}
+
+// Permission-less "my department" self-read for an HOD (see services/
+// academics.ts's doc comment) — used by /department/report instead of the
+// milestone 11 course-scanning workaround.
+export function useOwnDepartment() {
+  return useQuery({
+    queryKey: departmentsKeys.mine(),
+    queryFn: () => getOwnDepartment(),
   });
 }
 

@@ -28,6 +28,7 @@ export const departmentsKeys = {
   all: () => ['departments'] as const,
   list: (facultyId?: string) =>
     [...departmentsKeys.all(), 'list', facultyId ?? null] as const,
+  mine: () => [...departmentsKeys.all(), 'mine'] as const,
 };
 
 export const settingsKeys = {
@@ -102,4 +103,34 @@ export const approvalsKeys = {
   hodQueue: () => [...approvalsKeys.all(), 'hod-queue'] as const,
   advisees: (adviserId: string) =>
     [...approvalsKeys.all(), 'advisees', adviserId] as const,
+};
+
+// Milestone 13 (records & reports): the registry officer's final list is
+// scoped per semester + optional status filter; a transcript is scoped per
+// student. Both `records:read`-gated reads (backend/CLAUDE.md). Finalising a
+// semester has no own cache entry (it's a one-shot mutation) but invalidates
+// the whole `records` branch since it changes what "final" means for that
+// semester.
+export const recordsKeys = {
+  all: () => ['records'] as const,
+  list: (filters: object) => [...recordsKeys.all(), 'list', filters] as const,
+  transcript: (studentId: string) =>
+    [...recordsKeys.all(), 'transcript', studentId] as const,
+};
+
+// Milestone 13 (reports): the department report is scoped per semester +
+// department (an HOD's own, or one an admin picks); the system report is
+// scoped per optional semester filter. Both share `reports:read` on the
+// backend but are functionally separate reports (backend/CLAUDE.md).
+export const reportsKeys = {
+  all: () => ['reports'] as const,
+  department: (semesterId?: string, departmentId?: string) =>
+    [
+      ...reportsKeys.all(),
+      'department',
+      semesterId ?? null,
+      departmentId ?? null,
+    ] as const,
+  system: (semesterId?: string) =>
+    [...reportsKeys.all(), 'system', semesterId ?? null] as const,
 };

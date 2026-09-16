@@ -168,6 +168,29 @@ export async function deleteDepartment(id: string): Promise<ApiResult> {
   }
 }
 
+// Permission-less self-read (backend/CLAUDE.md's academics module notes,
+// added milestone 11's follow-up): returns the department the caller heads,
+// or null if they aren't an HOD of any department — never a 403/404. Used by
+// /department/report so an HOD doesn't need `academics:manage` just to learn
+// their own department id (mirrors the `fees/me`/`courses/mine` "read your
+// own" precedent).
+export async function getOwnDepartment(): Promise<
+  ApiResponse<Department | null>
+> {
+  try {
+    const response = await serverApi.get<ApiEnvelope<Department | null>>(
+      '/academics/departments/me',
+    );
+    return unwrap(response, 'Failed to load your department');
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      data: null,
+      message: handleAPIErrors(error, 'Failed to load your department'),
+    };
+  }
+}
+
 export async function assignHod(
   departmentId: string,
   userId: string,
