@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { DangerConfirm } from '@/components/shared/danger-confirm';
+import { StatusBadge, statusTone } from '@/components/shared/status-badge';
 import { SemesterSelect } from '@/components/courses/semester-select';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useSemesters } from '@/hooks/use-calendar';
@@ -95,7 +96,11 @@ export function RecordsView() {
       cell: (r) => r.courses.map((c) => c.code).join(', '),
     },
     { key: 'totalUnits', header: 'Units', cell: (r) => r.totalUnits },
-    { key: 'status', header: 'Status', cell: (r) => r.status },
+    {
+      key: 'status',
+      header: 'Status',
+      cell: (r) => <StatusBadge tone={statusTone(r.status)}>{r.status}</StatusBadge>,
+    },
   ];
 
   return (

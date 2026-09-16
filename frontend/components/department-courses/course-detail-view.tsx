@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { z } from 'zod';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { StatusBadge } from '@/components/shared/status-badge';
 import {
   Card,
   CardContent,
@@ -168,9 +168,9 @@ export function CourseDetailView({ courseId }: CourseDetailViewProps) {
               {course.department?.code} - {course.department?.name}
             </CardDescription>
           </div>
-          <Badge variant={course.isActive ? 'secondary' : 'destructive'}>
+          <StatusBadge tone={course.isActive ? 'success' : 'destructive'}>
             {course.isActive ? 'Active' : 'Inactive'}
-          </Badge>
+          </StatusBadge>
         </CardHeader>
         <CardContent>
           <Form {...form}>

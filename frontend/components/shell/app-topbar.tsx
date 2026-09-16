@@ -36,7 +36,7 @@ export function AppTopbar({ user }: AppTopbarProps) {
   const logout = useLogout();
 
   return (
-    <header className="bg-card flex h-16 items-center justify-between border-b px-6">
+    <header className="bg-card/95 supports-[backdrop-filter]:backdrop-blur sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b px-6">
       <div>
         <p className="text-sm font-medium">
           {user.firstName} {user.lastName}
@@ -46,7 +46,7 @@ export function AppTopbar({ user }: AppTopbarProps) {
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <ModeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger className="rounded-full outline-none">

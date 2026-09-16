@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StatusBadge, statusTone } from '@/components/shared/status-badge';
 import { NAV_ITEMS } from '@/lib/nav';
 import { PERMISSIONS, hasAnyPermission } from '@/lib/permissions';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -74,8 +75,8 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">
+      <div className="border-b pb-5">
+        <h1 className="text-2xl font-semibold tracking-tight">
           Welcome, {user.firstName} {user.lastName}
         </h1>
         <div className="mt-2 flex flex-wrap gap-1.5">
@@ -103,15 +104,23 @@ export function DashboardView() {
         </h2>
         {links.length > 0 ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {links.map((item) => (
-              <Link key={item.href} href={item.href}>
-                <Card className="hover:border-primary/50 transition-colors">
-                  <CardHeader>
-                    <CardTitle className="text-base">{item.label}</CardTitle>
-                  </CardHeader>
-                </Card>
-              </Link>
-            ))}
+            {links.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link key={item.href} href={item.href}>
+                  <Card className="hover:border-primary/50 h-full transition-colors">
+                    <CardHeader>
+                      <div className="flex items-center gap-2.5">
+                        <span className="bg-secondary text-secondary-foreground flex size-8 shrink-0 items-center justify-center rounded-md">
+                          <Icon className="size-4" />
+                        </span>
+                        <CardTitle className="text-base">{item.label}</CardTitle>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         ) : (
           <Card>
@@ -144,6 +153,8 @@ function StudentCard() {
   const cleared = feeResult?.data?.clearances.some(
     (c) => c.sessionId === currentSessionId && c.cleared,
   );
+  const canDownloadForm =
+    registration?.status === 'approved' || registration?.status === 'finalised';
 
   return (
     <Card>
@@ -155,17 +166,25 @@ function StudentCard() {
         {registrationLoading ? (
           <Skeleton className="h-5 w-24" />
         ) : registration ? (
-          <Badge variant="secondary">{formatStatus(registration.status)}</Badge>
+          <StatusBadge tone={statusTone(registration.status)}>
+            {formatStatus(registration.status)}
+          </StatusBadge>
         ) : (
           <p className="text-muted-foreground text-sm">Not yet started</p>
         )}
         {feeLoading ? (
           <Skeleton className="h-5 w-32" />
         ) : (
-          <Badge variant={cleared ? 'secondary' : 'outline'}>
+          <StatusBadge tone={cleared ? 'success' : 'neutral'}>
             {cleared ? 'Fee cleared' : 'Fee not yet cleared'}
-          </Badge>
+          </StatusBadge>
         )}
+        <Link
+          href={canDownloadForm ? '/registration/form' : '/registration/status'}
+          className="text-primary block text-sm font-medium hover:underline"
+        >
+          {canDownloadForm ? 'Download your course form' : 'View status'}
+        </Link>
       </CardContent>
     </Card>
   );
@@ -237,9 +256,9 @@ function RegistryCard() {
             <p className="text-sm">
               {current.session?.name} - {formatStatus(current.name)} semester
             </p>
-            <Badge variant={current.lockedAt ? 'secondary' : 'outline'}>
+            <StatusBadge tone={current.lockedAt ? 'success' : 'warning'}>
               {current.lockedAt ? 'Finalised and locked' : 'Not yet finalised'}
-            </Badge>
+            </StatusBadge>
             {!current.lockedAt ? (
               <p className="text-muted-foreground text-xs">
                 {recordsLoading ? '…' : outstanding} approved, not yet

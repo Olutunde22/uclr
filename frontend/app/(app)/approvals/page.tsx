@@ -14,6 +14,7 @@ import { canAccess } from '@/lib/page-access';
 import { hasPermission, PERMISSIONS } from '@/lib/permissions';
 import { getSession } from '@/lib/session';
 import { getAdviserQueue, getHodQueue } from '@/services/approvals';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Approvals',
@@ -47,12 +48,10 @@ export default async function ApprovalsPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Approvals</h1>
-          <p className="text-muted-foreground text-sm">
-            Registrations waiting on your decision.
-          </p>
-        </div>
+        <PageHeader
+          title="Approvals"
+          description="Registrations waiting on your decision."
+        />
         {isAdviser && isHod ? (
           <Tabs defaultValue="adviser">
             <TabsList>

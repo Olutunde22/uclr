@@ -9,6 +9,7 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { getSession } from '@/lib/session';
 import { getSemesters } from '@/services/calendar';
 import { getSystemReport } from '@/services/reports';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'System reports',
@@ -46,12 +47,10 @@ export default async function AdminReportsPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">System reports</h1>
-          <p className="text-muted-foreground text-sm">
-            Login activity and registration totals across the whole system.
-          </p>
-        </div>
+        <PageHeader
+          title="System reports"
+          description="Login activity and registration totals across the whole system."
+        />
         <SystemReportView />
       </div>
     </HydrationBoundary>

@@ -8,6 +8,7 @@ import { canAccess } from '@/lib/page-access';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getDepartments } from '@/services/academics';
 import { getUser, getUsers } from '@/services/users';
+import { PageHeader } from '@/components/shared/page-header';
 
 interface EditUserPageProps {
   params: Promise<{ id: string }>;
@@ -47,12 +48,10 @@ export default async function EditUserPage({ params }: EditUserPageProps) {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="max-w-2xl space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Edit user</h1>
-          <p className="text-muted-foreground text-sm">
-            Update details, roles and profile.
-          </p>
-        </div>
+        <PageHeader
+          title="Edit user"
+          description="Update details, roles and profile."
+        />
         <EditUserView userId={id} />
       </div>
     </HydrationBoundary>

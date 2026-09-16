@@ -7,6 +7,7 @@ import { settingsKeys } from '@/hooks/keys';
 import { canAccess } from '@/lib/page-access';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getSettings } from '@/services/settings';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Settings',
@@ -28,12 +29,10 @@ export default async function AdminSettingsPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Settings</h1>
-          <p className="text-muted-foreground text-sm">
-            System-wide values used by the registration rules.
-          </p>
-        </div>
+        <PageHeader
+          title="Settings"
+          description="System-wide values used by the registration rules."
+        />
         <SettingsView />
       </div>
     </HydrationBoundary>

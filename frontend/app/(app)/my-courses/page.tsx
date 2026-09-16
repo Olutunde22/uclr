@@ -5,6 +5,7 @@ import { MyCoursesListView } from '@/components/my-courses/my-courses-list-view'
 import { coursesKeys } from '@/hooks/keys';
 import { requireSession } from '@/lib/route-access';
 import { getMyCourses } from '@/services/courses';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'My courses',
@@ -28,12 +29,10 @@ export default async function MyCoursesPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">My courses</h1>
-          <p className="text-muted-foreground text-sm">
-            Edit capacity and prerequisites, and view each course&apos;s class list.
-          </p>
-        </div>
+        <PageHeader
+          title="My courses"
+          description="Edit capacity and prerequisites, and view each course's class list."
+        />
         <MyCoursesListView />
       </div>
     </HydrationBoundary>

@@ -7,6 +7,7 @@ import { departmentsKeys, facultiesKeys } from '@/hooks/keys';
 import { canAccess } from '@/lib/page-access';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getDepartments, getFaculties } from '@/services/academics';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Academics',
@@ -34,12 +35,10 @@ export default async function AdminAcademicsPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Academics</h1>
-          <p className="text-muted-foreground text-sm">
-            Faculties, departments and HOD assignment.
-          </p>
-        </div>
+        <PageHeader
+          title="Academics"
+          description="Faculties, departments and HOD assignment."
+        />
         <AcademicsView />
       </div>
     </HydrationBoundary>

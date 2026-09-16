@@ -8,6 +8,7 @@ import { canAccess } from '@/lib/page-access';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getDepartments } from '@/services/academics';
 import { getUsers } from '@/services/users';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Create user',
@@ -37,12 +38,10 @@ export default async function NewUserPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="max-w-2xl space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Create user</h1>
-          <p className="text-muted-foreground text-sm">
-            Assign roles first - the profile fields you need appear below.
-          </p>
-        </div>
+        <PageHeader
+          title="Create user"
+          description="Assign roles first - the profile fields you need appear below."
+        />
         <CreateUserForm />
       </div>
     </HydrationBoundary>

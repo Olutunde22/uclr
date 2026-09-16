@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { cn } from 'cn';
 import {
   Table,
   TableBody,
@@ -57,12 +58,18 @@ export function DataTable<T>({
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="bg-card overflow-hidden rounded-lg border">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="hover:bg-transparent">
             {columns.map((column) => (
-              <TableHead key={column.key} className={column.className}>
+              <TableHead
+                key={column.key}
+                className={cn(
+                  'bg-muted/50 h-10 text-xs font-semibold tracking-wide uppercase',
+                  column.className,
+                )}
+              >
                 {column.header}
               </TableHead>
             ))}
@@ -71,17 +78,17 @@ export function DataTable<T>({
         <TableBody>
           {isLoading ? (
             Array.from({ length: skeletonRows }).map((_, i) => (
-              <TableRow key={`skeleton-${i}`}>
+              <TableRow key={`skeleton-${i}`} className="hover:bg-transparent">
                 {columns.map((column) => (
-                  <TableCell key={column.key}>
+                  <TableCell key={column.key} className="py-3">
                     <Skeleton className="h-4 w-full" />
                   </TableCell>
                 ))}
               </TableRow>
             ))
           ) : rows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-32">
+            <TableRow className="hover:bg-transparent">
+              <TableCell colSpan={columns.length} className="h-auto p-0">
                 <EmptyState title={emptyTitle} description={emptyDescription} />
               </TableCell>
             </TableRow>
@@ -89,7 +96,10 @@ export function DataTable<T>({
             rows.map((row) => (
               <TableRow key={rowKey(row)}>
                 {columns.map((column) => (
-                  <TableCell key={column.key} className={column.className}>
+                  <TableCell
+                    key={column.key}
+                    className={cn('py-3', column.className)}
+                  >
                     {column.cell(row)}
                   </TableCell>
                 ))}

@@ -4,11 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'nextjs-toploader/app';
 import { toast } from 'sonner';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Textarea } from '@/components/ui/textarea';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { RegisteredCourseList } from '@/components/registration/registered-course-list';
 import { RejectDecisionDialog } from '@/components/approvals/reject-decision-dialog';
 import {
@@ -78,11 +78,11 @@ export function RegistrationDetailView({ id, role }: RegistrationDetailViewProps
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>{studentName}</CardTitle>
-          <Badge variant="secondary">
+          <StatusBadge tone="warning">
             {registration.status === 'pending_adviser'
               ? 'Pending adviser approval'
               : 'Pending HOD approval'}
-          </Badge>
+          </StatusBadge>
         </CardHeader>
         <CardContent className="space-y-1 text-sm">
           <p className="text-muted-foreground">{registration.student?.email}</p>
@@ -150,6 +150,11 @@ export function RegistrationDetailView({ id, role }: RegistrationDetailViewProps
               Reject
             </Button>
           </div>
+          <p className="text-muted-foreground border-t pt-3 text-xs">
+            {role === 'adviser'
+              ? 'Approving sends this registration on to HOD approval. Rejecting sends your comment straight back to the student, who can edit and resubmit.'
+              : 'Approving this registration lets the student download their course form immediately. Rejecting sends your comment straight back to the student, who can edit and resubmit.'}
+          </p>
         </CardContent>
       </Card>
 

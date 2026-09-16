@@ -1,9 +1,9 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { EmptyState } from '@/components/ui/empty-state';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { useOwnFeeStatus } from '@/hooks/use-fees';
 import type { FeeClearance, FeePayment } from '@/types/fees';
 
@@ -66,9 +66,9 @@ export function MyFeesView() {
                   <span className="text-sm font-medium">
                     {clearance.session?.name ?? 'Unknown session'}
                   </span>
-                  <Badge variant={clearance.cleared ? 'secondary' : 'destructive'}>
+                  <StatusBadge tone={clearance.cleared ? 'success' : 'destructive'}>
                     {clearance.cleared ? 'Cleared' : 'Not cleared'}
-                  </Badge>
+                  </StatusBadge>
                 </li>
               ))}
             </ul>

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { StatusBadge } from '@/components/shared/status-badge';
 import {
   Select,
   SelectContent,
@@ -108,9 +109,9 @@ export function CoursesListView({ isAdmin, hodDepartment }: CoursesListViewProps
       key: 'status',
       header: 'Status',
       cell: (row) => (
-        <Badge variant={row.isActive ? 'secondary' : 'destructive'}>
+        <StatusBadge tone={row.isActive ? 'success' : 'destructive'}>
           {row.isActive ? 'Active' : 'Inactive'}
-        </Badge>
+        </StatusBadge>
       ),
     },
     {

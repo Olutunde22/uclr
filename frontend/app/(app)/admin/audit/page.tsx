@@ -7,6 +7,7 @@ import { auditKeys } from '@/hooks/keys';
 import { canAccess } from '@/lib/page-access';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getAuditLogs } from '@/services/audit';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Audit log',
@@ -30,12 +31,10 @@ export default async function AdminAuditPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Audit log</h1>
-          <p className="text-muted-foreground text-sm">
-            Every mutation and permission denial, most recent first.
-          </p>
-        </div>
+        <PageHeader
+          title="Audit log"
+          description="Every mutation and permission denial, most recent first."
+        />
         <AuditLogView />
       </div>
     </HydrationBoundary>

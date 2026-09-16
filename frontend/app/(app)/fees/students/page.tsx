@@ -8,6 +8,7 @@ import { canAccess } from '@/lib/page-access';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getSessions } from '@/services/calendar';
 import { listPayments } from '@/services/fees';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Student fees',
@@ -40,13 +41,10 @@ export default async function FeesStudentsPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Student fees</h1>
-          <p className="text-muted-foreground text-sm">
-            Search a student by matric no. to record a payment or manage
-            their fee clearance.
-          </p>
-        </div>
+        <PageHeader
+          title="Student fees"
+          description="Search a student by matric no. to record a payment or manage their fee clearance."
+        />
         <FeesStudentsView />
       </div>
     </HydrationBoundary>

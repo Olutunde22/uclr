@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { useAdvisees } from '@/hooks/use-approvals';
 import type { AdviseeSummary } from '@/services/approvals';
 
@@ -40,7 +40,7 @@ export function AdviseesView({ adviserId }: AdviseesViewProps) {
       header: 'Status',
       cell: (a) =>
         a.pendingYourDecision ? (
-          <Badge>Pending your decision</Badge>
+          <StatusBadge tone="warning">Pending your decision</StatusBadge>
         ) : (
           <span className="text-muted-foreground text-sm">No pending action</span>
         ),

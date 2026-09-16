@@ -7,6 +7,7 @@ import { coursesKeys } from '@/hooks/keys';
 import { canAccess } from '@/lib/page-access';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getCourse } from '@/services/courses';
+import { PageHeader } from '@/components/shared/page-header';
 
 interface CourseDetailPageProps {
   params: Promise<{ id: string }>;
@@ -34,12 +35,10 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="max-w-3xl space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Course</h1>
-          <p className="text-muted-foreground text-sm">
-            Details, prerequisites, timetable slots and lecturer assignment.
-          </p>
-        </div>
+        <PageHeader
+          title="Course"
+          description="Details, prerequisites, timetable slots and lecturer assignment."
+        />
         <CourseDetailView courseId={id} />
       </div>
     </HydrationBoundary>

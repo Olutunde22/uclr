@@ -7,6 +7,7 @@ import { calendarKeys } from '@/hooks/keys';
 import { canAccess } from '@/lib/page-access';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getSemesters } from '@/services/calendar';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Records',
@@ -36,13 +37,10 @@ export default async function RecordsPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Records</h1>
-          <p className="text-muted-foreground text-sm">
-            The final registered list for a semester. Finalising locks the
-            semester and cannot be undone.
-          </p>
-        </div>
+        <PageHeader
+          title="Records"
+          description="The final registered list for a semester. Finalising locks the semester and cannot be undone."
+        />
         <RecordsView />
       </div>
     </HydrationBoundary>

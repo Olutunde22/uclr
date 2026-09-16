@@ -9,6 +9,7 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { getSemesters } from '@/services/calendar';
 import { getCourses } from '@/services/courses';
 import { getOwnRegistration } from '@/services/registrations';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Registration',
@@ -48,13 +49,10 @@ export default async function RegistrationPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Registration</h1>
-          <p className="text-muted-foreground text-sm">
-            Pick your courses for the current semester. Every rule violation is shown
-            as you go, so you can fix everything before you submit.
-          </p>
-        </div>
+        <PageHeader
+          title="Registration"
+          description="Pick your courses for the current semester. Every rule violation is shown as you go, so you can fix everything before you submit."
+        />
         <RegistrationView />
       </div>
     </HydrationBoundary>

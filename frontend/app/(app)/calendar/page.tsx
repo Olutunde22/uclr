@@ -7,6 +7,7 @@ import { calendarKeys } from '@/hooks/keys';
 import { canAccess } from '@/lib/page-access';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getSemesters, getSessions } from '@/services/calendar';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Calendar',
@@ -34,13 +35,10 @@ export default async function CalendarPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Calendar</h1>
-          <p className="text-muted-foreground text-sm">
-            Academic sessions, semesters and their registration and add/drop
-            windows.
-          </p>
-        </div>
+        <PageHeader
+          title="Calendar"
+          description="Academic sessions, semesters and their registration and add/drop windows."
+        />
         <CalendarView />
       </div>
     </HydrationBoundary>

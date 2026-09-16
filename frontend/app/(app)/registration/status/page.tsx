@@ -8,6 +8,7 @@ import { canAccess } from '@/lib/page-access';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getSemesters } from '@/services/calendar';
 import { getOwnRegistration } from '@/services/registrations';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Registration status',
@@ -36,12 +37,10 @@ export default async function RegistrationStatusPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Registration status</h1>
-          <p className="text-muted-foreground text-sm">
-            Your current status and the adviser/HOD approval trail.
-          </p>
-        </div>
+        <PageHeader
+          title="Registration status"
+          description="Your current status and the adviser/HOD approval trail."
+        />
         <StatusView />
       </div>
     </HydrationBoundary>

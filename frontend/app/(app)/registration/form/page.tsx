@@ -2,6 +2,7 @@ import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import type { Metadata } from 'next';
 import { getQueryClient } from '@/app/get-query-client';
 import { NoAccess } from '@/components/shared/no-access';
+import { PageHeader } from '@/components/shared/page-header';
 import { CourseFormView } from '@/components/registration/course-form-view';
 import { authKeys, calendarKeys, registrationsKeys } from '@/hooks/keys';
 import { canAccess } from '@/lib/page-access';
@@ -43,12 +44,11 @@ export default async function RegistrationFormPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div className="no-print">
-          <h1 className="text-2xl font-semibold">Course form</h1>
-          <p className="text-muted-foreground text-sm">
-            A printable copy of your approved course registration.
-          </p>
-        </div>
+        <PageHeader
+          title="Course form"
+          description="A printable copy of your approved course registration."
+          className="no-print"
+        />
         <CourseFormView />
       </div>
     </HydrationBoundary>

@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -41,6 +41,10 @@
   --color-card: var(--card);
   --color-brand-gold-foreground: var(--brand-gold-foreground);
   --color-brand-gold: var(--brand-gold);
+  --color-success-foreground: var(--success-foreground);
+  --color-success: var(--success);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning: var(--warning);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -58,9 +62,19 @@
  * base set) for deliberate brand accents: active nav item, focus rings,
  * highlighted stat, print letterhead — anywhere the gold should read as
  * "brand", not just "a hover state".
+ *
+ * Design pass, 2026-09-16: the original values were all technically correct
+ * but read as flat/washed out in practice (page background the same white
+ * as every card, a near-invisible pale accent, a muted grey-lavender
+ * "primary" in dark mode that didn't read as the same brand as the light
+ * navy). Tokens below keep the same hues/identity but push saturation and
+ * contrast up: the page background is now a faint navy-tinted grey so cards
+ * sit visibly on top of it, the gold accent is stronger, and dark mode's
+ * primary is a genuinely saturated navy-indigo rather than a desaturated
+ * grey-blue.
  */
 :root {
-  --background: #ffffff;
+  --background: #f4f5fb;
   --foreground: #151c4a;
   --card: #ffffff;
   --card-foreground: #151c4a;
@@ -68,17 +82,21 @@
   --popover-foreground: #151c4a;
   --primary: #151c4a;
   --primary-foreground: #ffffff;
-  --secondary: #eef0f7;
+  --secondary: #e3e7f5;
   --secondary-foreground: #151c4a;
-  --muted: #f4f5f9;
-  --muted-foreground: #5b6178;
-  --accent: #fdf3e0;
-  --accent-foreground: #7a5c06;
+  --muted: #eceef7;
+  --muted-foreground: #565d78;
+  --accent: #faecc7;
+  --accent-foreground: #6b4c04;
   --brand-gold: #b8860b;
   --brand-gold-foreground: #151c4a;
+  --success: #dcf3e2;
+  --success-foreground: #146c2e;
+  --warning: #fbe7bf;
+  --warning-foreground: #855806;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #e1e3ec;
-  --input: #e1e3ec;
+  --border: #dbdfec;
+  --input: #dbdfec;
   --ring: #b8860b;
   --chart-1: #151c4a;
   --chart-2: #b8860b;
@@ -90,45 +108,49 @@
   --sidebar-foreground: #eef0f7;
   --sidebar-primary: #b8860b;
   --sidebar-primary-foreground: #151c4a;
-  --sidebar-accent: #1f2761;
+  --sidebar-accent: #232c68;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #26305e;
   --sidebar-ring: #b8860b;
 }
 
 .dark {
-  --background: #0b0e21;
+  --background: #090c1c;
   --foreground: #e8eaf3;
-  --card: #12163a;
+  --card: #141a44;
   --card-foreground: #e8eaf3;
-  --popover: #12163a;
+  --popover: #141a44;
   --popover-foreground: #e8eaf3;
-  --primary: #4f5da3;
+  --primary: #5c6bc7;
   --primary-foreground: #ffffff;
-  --secondary: #1b2050;
+  --secondary: #202862;
   --secondary-foreground: #e8eaf3;
-  --muted: #171b3d;
-  --muted-foreground: #a7adc9;
-  --accent: #2a2410;
-  --accent-foreground: #e9c869;
+  --muted: #181e48;
+  --muted-foreground: #aab0d0;
+  --accent: #3a2c0e;
+  --accent-foreground: #f0c458;
   --brand-gold: #d4a017;
   --brand-gold-foreground: #151c4a;
+  --success: #103a24;
+  --success-foreground: #6fdf9a;
+  --warning: #3d2d0a;
+  --warning-foreground: #f2c565;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: color-mix(in oklab, white 10%, transparent);
-  --input: color-mix(in oklab, white 15%, transparent);
+  --border: color-mix(in oklab, white 12%, transparent);
+  --input: color-mix(in oklab, white 17%, transparent);
   --ring: #d4a017;
   --chart-1: #a9b3e8;
   --chart-2: #d4a017;
   --chart-3: #7a88d6;
   --chart-4: #e9c869;
   --chart-5: #5b6178;
-  --sidebar: #0b0e21;
+  --sidebar: #090c1c;
   --sidebar-foreground: #e8eaf3;
   --sidebar-primary: #d4a017;
   --sidebar-primary-foreground: #151c4a;
-  --sidebar-accent: #171b3d;
+  --sidebar-accent: #1c2354;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: color-mix(in oklab, white 8%, transparent);
+  --sidebar-border: color-mix(in oklab, white 10%, transparent);
   --sidebar-ring: #d4a017;
 }
 

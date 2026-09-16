@@ -8,6 +8,7 @@ import { canAccess } from '@/lib/page-access';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getSession } from '@/lib/session';
 import { getAdvisees } from '@/services/approvals';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Advisees',
@@ -32,13 +33,10 @@ export default async function AdviseesPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Advisees</h1>
-          <p className="text-muted-foreground text-sm">
-            Your students and whether they have a registration waiting on your
-            decision.
-          </p>
-        </div>
+        <PageHeader
+          title="Advisees"
+          description="Your students and whether they have a registration waiting on your decision."
+        />
         <AdviseesView adviserId={user.id} />
       </div>
     </HydrationBoundary>

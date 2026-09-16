@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'nextjs-toploader/app';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Badge } from '@/components/ui/badge';
+import { FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatusBadge, statusTone } from '@/components/shared/status-badge';
 import { CoursePicker } from '@/components/registration/course-picker';
 import { RegisteredCourseList } from '@/components/registration/registered-course-list';
 import { ViolationsList } from '@/components/registration/violations-list';
@@ -36,6 +38,7 @@ const STATUS_LABEL: Record<string, string> = {
 // doesn't try to read the window itself, it just surfaces whatever violation
 // `addDrop` returns if the window has closed).
 export function RegistrationView() {
+  const router = useRouter();
   const { data: semestersResult, isLoading: semestersLoading } = useSemesters();
   const currentSemester = (semestersResult?.data ?? []).find((s) => s.isCurrent);
   const semesterId = currentSemester?.id;
@@ -151,6 +154,7 @@ export function RegistrationView() {
       return;
     }
     toast.success('Registration submitted for adviser approval.');
+    router.push('/registration/status');
   }
 
   if (semestersLoading || registrationLoading || coursesLoading) {
@@ -176,7 +180,9 @@ export function RegistrationView() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Your registration</CardTitle>
-            <Badge variant="secondary">{STATUS_LABEL[registration.status]}</Badge>
+            <StatusBadge tone={statusTone(registration.status)}>
+              {STATUS_LABEL[registration.status]}
+            </StatusBadge>
           </CardHeader>
           <CardContent className="space-y-4">
             {registration.status === 'rejected' ? (
@@ -204,9 +210,12 @@ export function RegistrationView() {
                   <Button asChild variant="outline">
                     <Link href="/registration/status">View status and approval trail</Link>
                   </Button>
-                  {registration.status === 'finalised' ? (
-                    <Button asChild variant="outline">
-                      <Link href="/registration/form">View printable course form</Link>
+                  {registration.status === 'approved' || registration.status === 'finalised' ? (
+                    <Button asChild>
+                      <Link href="/registration/form">
+                        <FileDown className="size-4" />
+                        Download your course form
+                      </Link>
                     </Button>
                   ) : null}
                   {canAddDrop ? (

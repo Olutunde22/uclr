@@ -5,6 +5,7 @@ import { ClassListView } from '@/components/my-courses/class-list-view';
 import { calendarKeys } from '@/hooks/keys';
 import { requireSession } from '@/lib/route-access';
 import { getSemesters } from '@/services/calendar';
+import { PageHeader } from '@/components/shared/page-header';
 
 interface ClassListPageProps {
   params: Promise<{ id: string }>;
@@ -37,13 +38,10 @@ export default async function ClassListPage({ params }: ClassListPageProps) {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Class list</h1>
-          <p className="text-muted-foreground text-sm">
-            Students with an approved or finalised registration for this
-            course in the selected semester.
-          </p>
-        </div>
+        <PageHeader
+          title="Class list"
+          description="Students with an approved or finalised registration for this course in the selected semester."
+        />
         <ClassListView courseId={id} />
       </div>
     </HydrationBoundary>

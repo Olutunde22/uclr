@@ -6,6 +6,7 @@ import { MyFeesView } from '@/components/fees/my-fees-view';
 import { feesKeys } from '@/hooks/keys';
 import { requireSession } from '@/lib/route-access';
 import { getOwnFeeStatus } from '@/services/fees';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Fees',
@@ -31,12 +32,10 @@ export default async function FeesPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Fees</h1>
-          <p className="text-muted-foreground text-sm">
-            Your fee clearance status and payment history, per session.
-          </p>
-        </div>
+        <PageHeader
+          title="Fees"
+          description="Your fee clearance status and payment history, per session."
+        />
         <MyFeesView />
       </div>
     </HydrationBoundary>

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { DangerConfirm } from '@/components/shared/danger-confirm';
+import { StatusBadge } from '@/components/shared/status-badge';
 import {
   Select,
   SelectContent,
@@ -86,7 +87,7 @@ export function SemestersPanel() {
       cell: (row) => (
         <div className="flex flex-col gap-1">
           {row.isCurrent ? <Badge>Current</Badge> : null}
-          {row.lockedAt ? <Badge variant="destructive">Locked</Badge> : null}
+          {row.lockedAt ? <StatusBadge tone="neutral">Locked</StatusBadge> : null}
         </div>
       ),
     },

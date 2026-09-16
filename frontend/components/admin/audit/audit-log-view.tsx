@@ -1,19 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
+import { StatusBadge, type StatusTone } from '@/components/shared/status-badge';
 import { useAuditLogs } from '@/hooks/use-audit';
 import type { AuditLog } from '@/types/audit';
 
 const PAGE_SIZE = 25;
 
-function outcomeVariant(outcome: string): 'secondary' | 'destructive' | 'outline' {
-  if (outcome === 'success') return 'secondary';
+function outcomeTone(outcome: string): StatusTone {
+  if (outcome === 'success') return 'success';
   if (outcome === 'denied' || outcome === 'error') return 'destructive';
-  return 'outline';
+  return 'neutral';
 }
 
 function formatDate(value: string) {
@@ -67,7 +67,7 @@ export function AuditLogView() {
       key: 'outcome',
       header: 'Outcome',
       cell: (row) => (
-        <Badge variant={outcomeVariant(row.outcome)}>{row.outcome}</Badge>
+        <StatusBadge tone={outcomeTone(row.outcome)}>{row.outcome}</StatusBadge>
       ),
     },
     {

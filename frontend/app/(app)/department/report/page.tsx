@@ -9,6 +9,7 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { getSession } from '@/lib/session';
 import { getSemesters } from '@/services/calendar';
 import { getOwnDepartment } from '@/services/academics';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Department report',
@@ -44,12 +45,10 @@ export default async function DepartmentReportPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Department report</h1>
-          <p className="text-muted-foreground text-sm">
-            Registration counts by course, level and status for a semester.
-          </p>
-        </div>
+        <PageHeader
+          title="Department report"
+          description="Registration counts by course, level and status for a semester."
+        />
         <DepartmentReportView isAdmin={isAdmin} />
       </div>
     </HydrationBoundary>

@@ -8,6 +8,7 @@ import { canAccess } from '@/lib/page-access';
 import { hasPermission, PERMISSIONS } from '@/lib/permissions';
 import { getSession } from '@/lib/session';
 import { getAdviserQueue, getHodQueue } from '@/services/approvals';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Review registration',
@@ -55,12 +56,10 @@ export default async function ApprovalDetailPage({
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Review registration</h1>
-          <p className="text-muted-foreground text-sm">
-            Check the submitted courses and record your decision.
-          </p>
-        </div>
+        <PageHeader
+          title="Review registration"
+          description="Check the submitted courses and record your decision."
+        />
         <RegistrationDetailView id={id} role={role ?? (isHod ? 'hod' : 'adviser')} />
       </div>
     </HydrationBoundary>

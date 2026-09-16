@@ -4,8 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { StatusBadge } from '@/components/shared/status-badge';
 import {
   Card,
   CardContent,
@@ -119,9 +119,9 @@ export function EditUserView({ userId }: EditUserViewProps) {
             </CardTitle>
             <CardDescription>{user.email}</CardDescription>
           </div>
-          <Badge variant={user.isActive ? 'secondary' : 'destructive'}>
+          <StatusBadge tone={user.isActive ? 'success' : 'destructive'}>
             {user.isActive ? 'Active' : 'Disabled'}
-          </Badge>
+          </StatusBadge>
         </CardHeader>
         <CardContent>
           <Form {...form}>

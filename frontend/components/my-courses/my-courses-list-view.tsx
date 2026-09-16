@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { CapacityFormDialog } from '@/components/my-courses/capacity-form-dialog';
 import { PrerequisitesDialog } from '@/components/my-courses/prerequisites-dialog';
 import { useMyCourses } from '@/hooks/use-courses';
@@ -35,9 +35,9 @@ export function MyCoursesListView() {
       key: 'status',
       header: 'Status',
       cell: (row) => (
-        <Badge variant={row.isActive ? 'secondary' : 'destructive'}>
+        <StatusBadge tone={row.isActive ? 'success' : 'destructive'}>
           {row.isActive ? 'Active' : 'Inactive'}
-        </Badge>
+        </StatusBadge>
       ),
     },
     {

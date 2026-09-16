@@ -12,6 +12,7 @@ import {
 import { EmptyState } from '@/components/ui/empty-state';
 import { Switch } from '@/components/ui/switch';
 import { DangerConfirm } from '@/components/shared/danger-confirm';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { useFeeSessionOptions, useIssueClearance, useRevokeClearance } from '@/hooks/use-fees';
 import type { AcademicSession } from '@/types/calendar';
 import type { User } from '@/types/users';
@@ -97,15 +98,17 @@ export function ClearancePanel({ student }: ClearancePanelProps) {
                   key={session.id}
                   className="flex items-center justify-between rounded-md border p-3"
                 >
-                  <div>
+                  <div className="space-y-1">
                     <p className="text-sm font-medium">{session.name}</p>
-                    <p className="text-muted-foreground text-xs">
-                      {state === undefined
-                        ? 'Not yet checked this session'
-                        : state
-                          ? 'Cleared'
-                          : 'Not cleared'}
-                    </p>
+                    {state === undefined ? (
+                      <p className="text-muted-foreground text-xs">
+                        Not yet checked this session
+                      </p>
+                    ) : (
+                      <StatusBadge tone={state ? 'success' : 'destructive'}>
+                        {state ? 'Cleared' : 'Not cleared'}
+                      </StatusBadge>
+                    )}
                   </div>
                   <Switch
                     checked={!!state}

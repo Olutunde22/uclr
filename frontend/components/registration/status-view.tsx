@@ -1,12 +1,15 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { FileDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { StatusBadge, statusTone } from '@/components/shared/status-badge';
 import { RegisteredCourseList } from '@/components/registration/registered-course-list';
 import { useOwnRegistration } from '@/hooks/use-registrations';
 import { useSemesters } from '@/hooks/use-calendar';
-import type { ApprovalDecisionStatus } from '@/types/registrations';
+import type { ApprovalDecisionStatus, RegistrationStatus } from '@/types/registrations';
 
 const STATUS_LABEL: Record<string, string> = {
   draft: 'Draft',
@@ -17,10 +20,22 @@ const STATUS_LABEL: Record<string, string> = {
   finalised: 'Finalised',
 };
 
+// What the student should do or expect next at each status - the "what
+// happens next" copy the design pass added alongside the badge, so a status
+// page never just states a fact with no guidance attached.
+const STATUS_NEXT_STEP: Record<RegistrationStatus, string> = {
+  draft: 'Finish selecting your courses and submit for approval.',
+  pending_adviser: "Your registration is awaiting your academic adviser's decision.",
+  pending_hod: "Your adviser approved your registration. It's now awaiting HOD approval.",
+  approved: 'Your registration is approved. You can now download your course form below.',
+  rejected: 'Your registration was rejected - see the comment below, then edit and resubmit.',
+  finalised:
+    'Your registration has been finalised by the registry for this semester. You can still download your course form.',
+};
+
 function decisionBadge(status: ApprovalDecisionStatus) {
-  if (status === 'approved') return <Badge>Approved</Badge>;
-  if (status === 'rejected') return <Badge variant="destructive">Rejected</Badge>;
-  return <Badge variant="secondary">Pending</Badge>;
+  const label = status === 'approved' ? 'Approved' : status === 'rejected' ? 'Rejected' : 'Pending';
+  return <StatusBadge tone={statusTone(status)}>{label}</StatusBadge>;
 }
 
 function formatDate(value?: string | null) {
@@ -65,18 +80,41 @@ export function StatusView() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Status</CardTitle>
-          <Badge variant="secondary">{STATUS_LABEL[registration.status]}</Badge>
+          <StatusBadge tone={statusTone(registration.status)}>
+            {STATUS_LABEL[registration.status]}
+          </StatusBadge>
         </CardHeader>
-        <CardContent className="space-y-1 text-sm">
-          <p>
-            Semester: {registration.semester?.session?.name ?? ''}{' '}
-            {registration.semester?.name === 'first' ? 'First' : 'Second'} semester
-          </p>
-          <p>Total credit units: {registration.totalUnits}</p>
-          {registration.submittedAt ? (
-            <p className="text-muted-foreground">
-              Submitted {formatDate(registration.submittedAt)}
+        <CardContent className="space-y-3 text-sm">
+          <div className="space-y-1">
+            <p>
+              Semester: {registration.semester?.session?.name ?? ''}{' '}
+              {registration.semester?.name === 'first' ? 'First' : 'Second'} semester
             </p>
+            <p>Total credit units: {registration.totalUnits}</p>
+            {registration.submittedAt ? (
+              <p className="text-muted-foreground">
+                Submitted {formatDate(registration.submittedAt)}
+              </p>
+            ) : null}
+          </div>
+
+          <p className="text-muted-foreground border-t pt-3">
+            {STATUS_NEXT_STEP[registration.status]}
+          </p>
+
+          {registration.status === 'approved' || registration.status === 'finalised' ? (
+            <Button asChild>
+              <Link href="/registration/form">
+                <FileDown className="size-4" />
+                Download your course form
+              </Link>
+            </Button>
+          ) : null}
+
+          {registration.status === 'rejected' ? (
+            <Button asChild variant="outline">
+              <Link href="/registration">Edit and resubmit your registration</Link>
+            </Button>
           ) : null}
         </CardContent>
       </Card>

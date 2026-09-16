@@ -9,6 +9,7 @@ import { canAccess } from '@/lib/page-access';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getSession } from '@/lib/session';
 import { getCourses } from '@/services/courses';
+import { PageHeader } from '@/components/shared/page-header';
 
 export const metadata: Metadata = {
   title: 'Department courses',
@@ -83,12 +84,9 @@ export default async function DepartmentCoursesPage() {
 
 function Header() {
   return (
-    <div>
-      <h1 className="text-2xl font-semibold">Department courses</h1>
-      <p className="text-muted-foreground text-sm">
-        Create and manage courses, prerequisites, timetable slots and
-        lecturer assignment.
-      </p>
-    </div>
+    <PageHeader
+      title="Department courses"
+      description="Create and manage courses, prerequisites, timetable slots and lecturer assignment."
+    />
   );
 }
